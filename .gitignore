@@ -3,3 +3,5 @@
 ################################################################################
 
 /.vs
+/MonitorWindowsService.WS/obj/Debug
+/MonitorWindowsService.WS/bin/Debug
