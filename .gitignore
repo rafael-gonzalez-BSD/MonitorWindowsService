@@ -5,3 +5,4 @@
 /.vs
 /MonitorWindowsService.WS/obj/Debug
 /MonitorWindowsService.WS/bin/Debug
+/packages/Dapper.2.0.30

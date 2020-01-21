@@ -1,4 +1,6 @@
 ﻿using MonitorWindowsService.WS.Enum;
+using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
@@ -9,6 +11,9 @@ namespace MonitorWindowsService.WS
     public partial class ProcesoLog : ServiceBase
     {
         private int eventId = 1;
+        private int segundos = Convert.ToInt32(ConfigurationManager.AppSettings["TiempoIntervalo"]);
+        private Procesos.Excepciones excepciones;
+        private Procesos.Ejecuciones ejecuciones;
 
         public ProcesoLog()
         {
@@ -21,6 +26,9 @@ namespace MonitorWindowsService.WS
 
             eventLog1.Source = "MiOrigen";
             eventLog1.Log = "MiNuevoLog";
+
+            excepciones = new Procesos.Excepciones(eventLog1);
+            ejecuciones = new Procesos.Ejecuciones(eventLog1);
         }
 
         protected override void OnStart(string[] args)
@@ -36,7 +44,7 @@ namespace MonitorWindowsService.WS
             eventLog1.WriteEntry("Iniciando Servicio");
             Timer timer = new Timer
             {
-                Interval = 1000 // 60 seconds
+                Interval = 1000 * segundos // 60 seconds
             };
             timer.Elapsed += new ElapsedEventHandler(OnTimer);
             timer.Start();
@@ -66,6 +74,8 @@ namespace MonitorWindowsService.WS
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
             eventLog1.WriteEntry("Monitoreando El Sistema", EventLogEntryType.Information, eventId++);
+            excepciones.Start_Visitas();
+            ejecuciones.Start_Visitas();
         }
 
         protected override void OnContinue()
