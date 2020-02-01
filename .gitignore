@@ -6,3 +6,6 @@
 /MonitorWindowsService.WS/obj/Debug
 /MonitorWindowsService.WS/bin/Debug
 /packages/Dapper.2.0.30
+/MonitorWindowsService.WS/bin/Release
+/MonitorWindowsService.WS/obj/Release
+/packages/Newtonsoft.Json.12.0.3

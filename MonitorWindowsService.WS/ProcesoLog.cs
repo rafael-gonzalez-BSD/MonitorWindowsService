@@ -1,4 +1,5 @@
 ﻿using MonitorWindowsService.WS.Enum;
+using MonitorWindowsService.WS.Utils;
 using System;
 using System.Configuration;
 using System.Diagnostics;
@@ -14,21 +15,15 @@ namespace MonitorWindowsService.WS
         private int segundos = Convert.ToInt32(ConfigurationManager.AppSettings["TiempoIntervalo"]);
         private Procesos.Excepciones excepciones;
         private Procesos.Ejecuciones ejecuciones;
+        private readonly Log _eventLog;
 
         public ProcesoLog()
         {
             InitializeComponent();
-            eventLog1 = new EventLog();
-            if (!EventLog.SourceExists("MiOrigen"))
-            {
-                EventLog.CreateEventSource("MiOrigen", "MiNuevoLog");
-            }
+            _eventLog = new Log("Estatus de Servicio", "Servicio de Monitor de Procesos");
 
-            eventLog1.Source = "MiOrigen";
-            eventLog1.Log = "MiNuevoLog";
-
-            excepciones = new Procesos.Excepciones(eventLog1);
-            ejecuciones = new Procesos.Ejecuciones(eventLog1);
+            excepciones = new Procesos.Excepciones();
+            //ejecuciones = new Procesos.Ejecuciones();
         }
 
         protected override void OnStart(string[] args)
@@ -41,7 +36,7 @@ namespace MonitorWindowsService.WS
             };
             SetServiceStatus(this.ServiceHandle, ref ss);
 
-            eventLog1.WriteEntry("Iniciando Servicio");
+            _eventLog.CrearLog("Iniciando Servicio");
             Timer timer = new Timer
             {
                 Interval = 1000 * segundos // 60 seconds
@@ -68,19 +63,19 @@ namespace MonitorWindowsService.WS
             ss.dwCurrentState = ServiceState.SERVICE_STOPPED;
             SetServiceStatus(this.ServiceHandle, ref ss);
 
-            eventLog1.WriteEntry("Servicio Detenido");
+            _eventLog.CrearLog("Servicio Detenido");
         }
 
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
-            eventLog1.WriteEntry("Monitoreando El Sistema", EventLogEntryType.Information, eventId++);
+            _eventLog.CrearLog("Monitoreando El Sistema", EventLogEntryType.Information, eventId++);
             excepciones.Start_Visitas();
             ejecuciones.Start_Visitas();
         }
 
         protected override void OnContinue()
         {
-            eventLog1.WriteEntry("Servicio Continuando.");
+            _eventLog.CrearLog("Servicio Continuando.");
         }
 
         [DllImport("advapi32.dll", SetLastError = true)]

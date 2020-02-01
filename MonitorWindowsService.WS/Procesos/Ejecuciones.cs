@@ -1,20 +1,19 @@
-﻿using System.Diagnostics;
+﻿using MonitorWindowsService.WS.Utils;
 
 namespace MonitorWindowsService.WS.Procesos
 {
     public class Ejecuciones
     {
-        private readonly EventLog _eventLog;
+        private readonly Log _eventLog;
 
-        public Ejecuciones(EventLog eventLog)
+        public Ejecuciones()
         {
-            _eventLog = eventLog;
+            _eventLog = new Log("Proceso de Ejecuciones", "Servicio de Monitor de Procesos");
         }
 
         public void Start_Visitas()
         {
-            _eventLog.WriteEntry("Inicio del servicio de Ejecuciones");
-            throw new System.NotSupportedException();
+            _eventLog.CrearLog("Inicio del servicio de Ejecuciones");
         }
     }
 }

@@ -21,9 +21,12 @@ namespace MonitorWindowsService.WS.Datos.Base
             using (IDbConnection conn = new SqlConnection(_conexion))
             {
                 DynamicParameters DP = new DynamicParameters();
-                foreach (KeyValuePair<string, dynamic> item in P)
+                if (P != null)
                 {
-                    DP.Add(item.Key, item.Value);
+                    foreach (KeyValuePair<string, dynamic> item in P)
+                    {
+                        DP.Add(item.Key, item.Value);
+                    }
                 }
 
                 return conn.Query<T>(SP, param: DP, commandType: CommandType.StoredProcedure);
@@ -35,9 +38,12 @@ namespace MonitorWindowsService.WS.Datos.Base
             using (IDbConnection conn = new SqlConnection(_conexion))
             {
                 DynamicParameters DP = new DynamicParameters();
-                foreach (KeyValuePair<string, dynamic> item in P)
+                if (P != null)
                 {
-                    DP.Add(item.Key, item.Value);
+                    foreach (KeyValuePair<string, dynamic> item in P)
+                    {
+                        DP.Add(item.Key, item.Value);
+                    }
                 }
 
                 return await conn.QueryAsync<T>(SP, param: DP, commandType: CommandType.StoredProcedure);
