@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -77,10 +76,10 @@ namespace MonitorWindowsService.WS.Utils
             return files;
         }
 
-        public static List<string> GetLogFile(string urlFile, out string mensaje)
+        public static string GetLogFile(string urlFile, out string mensaje)
         {
             mensaje = "";
-            List<string> listLines = new List<string>();
+            string completeFile;
             HttpWebResponse res = null;
 
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(urlFile);
@@ -91,19 +90,13 @@ namespace MonitorWindowsService.WS.Utils
                 res = (HttpWebResponse)req.GetResponse();
                 using (StreamReader reader = new StreamReader(res.GetResponseStream(), Encoding.UTF8))
                 {
-
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        listLines.Add(line);
-                    }
-
+                    completeFile = reader.ReadToEnd();
                 }
             }
             catch (WebException ex)
             {
                 mensaje = string.Format("El archivo {0} no existe: {1}. {2}", urlFile, ex.Message, ex.InnerException);
-                listLines = new List<string>();
+                completeFile = "";
             }
             finally
             {
@@ -113,7 +106,7 @@ namespace MonitorWindowsService.WS.Utils
                 }
             }
 
-            return listLines;
+            return completeFile;
         }
 
         public static List<LogError> MapLog(List<string> list)
@@ -138,7 +131,6 @@ namespace MonitorWindowsService.WS.Utils
                         string[] prueba = x.Split(new string[] { " : " }, StringSplitOptions.None);
                         if (property.Name.Contains(prueba[0].Trim()))
                         {
-
                             foreach (var type in types)
                             {
                                 try
@@ -150,10 +142,8 @@ namespace MonitorWindowsService.WS.Utils
                                 catch { }
                             }
 
-
                             break;
                         }
-
                     }
                 }
 
@@ -167,11 +157,11 @@ namespace MonitorWindowsService.WS.Utils
             return listLogs;
         }
 
-        public static List<LogError> MapLogText(string fileText) {
+        public static List<LogError> MapLogText(string fileText)
+        {
             string completeFile = string.Format("[{0}]", fileText);
 
             return JsonConvert.DeserializeObject<List<LogError>>(completeFile);
-
         }
     }
 }

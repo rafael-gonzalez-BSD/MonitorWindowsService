@@ -12,7 +12,7 @@ namespace MonitorWindowsService.WS.Entidad
 
         public string ErrorNumero { get; set; }
 
-        public string ErrorDescripcion { get; set; }        
+        public string ErrorDescripcion { get; set; }
 
         public int SistemaId { get; set; }
 

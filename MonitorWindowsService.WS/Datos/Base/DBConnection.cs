@@ -49,5 +49,33 @@ namespace MonitorWindowsService.WS.Datos.Base
                 return await conn.QueryAsync<T>(SP, param: DP, commandType: CommandType.StoredProcedure);
             }
         }
+
+        public T QuerySingle<T>(Dictionary<string, dynamic> P, string SP)
+        {
+            using (IDbConnection conn = new SqlConnection(_conexion))
+            {
+                DynamicParameters DP = new DynamicParameters();
+
+                foreach (KeyValuePair<string, dynamic> item in P)
+                {
+                    DP.Add(item.Key, item.Value);
+                }
+                return conn.QueryFirst<T>(SP, param: DP, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public async Task<T> QuerySingleAsync<T>(Dictionary<string, dynamic> P, string SP)
+        {
+            using (IDbConnection conn = new SqlConnection(_conexion))
+            {
+                DynamicParameters DP = new DynamicParameters();
+
+                foreach (KeyValuePair<string, dynamic> item in P)
+                {
+                    DP.Add(item.Key, item.Value);
+                }
+                return await conn.QueryFirstAsync<T>(SP, param: DP, commandType: CommandType.StoredProcedure);
+            }
+        }
     }
 }

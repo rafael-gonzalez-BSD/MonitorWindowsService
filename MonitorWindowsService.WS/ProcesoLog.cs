@@ -23,7 +23,7 @@ namespace MonitorWindowsService.WS
             _eventLog = new Log("Estatus de Servicio", "Servicio de Monitor de Procesos");
 
             excepciones = new Procesos.Excepciones();
-            //ejecuciones = new Procesos.Ejecuciones();
+            ejecuciones = new Procesos.Ejecuciones();
         }
 
         protected override void OnStart(string[] args)

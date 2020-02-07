@@ -9,7 +9,7 @@ namespace MonitorWindowsService.WS.Datos.Implementacion
 
         internal DBConnection _db;
 
-        #endregion
+        #endregion ===== Variables =====
 
         #region ==== Constructores ====
 
@@ -18,22 +18,26 @@ namespace MonitorWindowsService.WS.Datos.Implementacion
             _db = new DBConnection("Default");
         }
 
-        #endregion
+        #endregion ==== Constructores ====
 
         #region ==== Metodos ====
 
         public IEnumerable<T> Consultar<T>(Dictionary<string, dynamic> P)
         {
-            return _db.Query<T>(P, "[Bitacora].[spObtenerConfiguracionesExcepciones_Consultar]");
+            return _db.Query<T>(P, "[Bitacora].[spExcepcionConfiguracion_Consultar]");
         }
 
-        public void Insertar<T>(Dictionary<string, dynamic> P)
+        public T Insertar<T>(Dictionary<string, dynamic> P)
         {
-            _db.Query<T>(P, "[Bitacora].[spRegistrarExcepciones_Insertar]");
+            return _db.QuerySingle<T>(P, "[Bitacora].[spRegistrarExcepciones_Insertar]");
         }
 
-        #endregion
+        public T Actualizar<T>(Dictionary<string, dynamic> P)
+        {
+            return _db.QuerySingle<T>(P, "[Bitacora].[spExcepcionConfiguracion_Actualizar]");
+        }
 
+        #endregion ==== Metodos ====
 
         #region ==== Dispose ====
 
@@ -44,8 +48,8 @@ namespace MonitorWindowsService.WS.Datos.Implementacion
                 _db.Dispose();
             }
             Dispose();
-        } 
+        }
 
-        #endregion
+        #endregion ==== Dispose ====
     }
 }

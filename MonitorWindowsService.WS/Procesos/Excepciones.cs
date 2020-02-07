@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace MonitorWindowsService.WS.Procesos
 {
@@ -14,36 +13,51 @@ namespace MonitorWindowsService.WS.Procesos
     {
         private readonly ExcepcionDao _dao;
         private readonly Log _eventLog;
-
-        private int SistemaId = 1;
+        private RespuestaModel m;
 
         public Excepciones()
         {
+            m = new RespuestaModel();
             _dao = new ExcepcionDao();
             _eventLog = new Log("Proceso de Excepciones", "Servicio de Monitor de Procesos");
         }
 
         public void Start_Visitas()
         {
+            RespuestaModel res = new RespuestaModel();
+            List<LogError> logErrors;
             _eventLog.CrearLog("Inicio del servicio de Exepciones");
             try
             {
-                //string path = Path.GetFullPath(Path.Combine("System.AppDomain.CurrentDomain.BaseDirectory", "..\\..\\..\\Logs"));
-                //VisitarDirectorio(path);
+                Dictionary<string, dynamic> P = new Dictionary<string, dynamic> {
+                    { "Opcion", 5 }
+                };
 
-                IEnumerable<Configuracion> configActivos = _dao.Consultar<Configuracion>(null);
+                IEnumerable<Configuracion> configActivos = _dao.Consultar<Configuracion>(P);
                 if (configActivos.Any())
                 {
                     foreach (Configuracion item in configActivos)
                     {
-                        SistemaId = item.SistemaId;
-                        if (item.RutaLog.Substring(0,7).Contains("http://") || item.RutaLog.Substring(0, 8).Contains("https://"))
+                        if (item.RutaLog.Substring(0, 7).Contains("http://") || item.RutaLog.Substring(0, 8).Contains("https://"))
                         {
-                            VisitarRuta(item.RutaLog);
+                            logErrors = VisitarRuta(item.RutaLog);
+                            if (logErrors.Count > 0)
+                            {
+                                res = RegistrarExcepcion(logErrors, item.SistemaId);
+                            }
                         }
-                        else 
+                        else
                         {
-                            VisitarDirectorio(item.RutaLog);
+                            logErrors = VisitarDirectorio(item.RutaLog);
+                            if (logErrors.Count > 0)
+                            {
+                                res = RegistrarExcepcion(logErrors, item.SistemaId);
+                            }
+                        }
+
+                        if (res.Satisfactorio)
+                        {
+                            ActualizarVisitaConfiguracion(4, item.ConfiguracionId, 1, false, out m);
                         }
                     }
                 }
@@ -54,8 +68,9 @@ namespace MonitorWindowsService.WS.Procesos
             }
         }
 
-        private void VisitarRuta(string RutaLog)
+        private List<LogError> VisitarRuta(string RutaLog)
         {
+            List<LogError> logErrors = new List<LogError>();
             _eventLog.CrearLog("Buscando archivos de log en la ruta: " + RutaLog);
             try
             {
@@ -64,24 +79,23 @@ namespace MonitorWindowsService.WS.Procesos
                 {
                     _eventLog.CrearLog("Leyendo el archivo: " + filename);
                     string urlFile = Path.Combine(RutaLog, filename);
-                    List<string> lines = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
-                    List<LogError> logErrors = FileSystemScanner.MapLog(lines);
-
-                    if (logErrors.Count > 0)
-                    {
-                        logErrors.ForEach(RegistrarExcepcion);
-                    }
+                    string fileText = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
+                    logErrors = FileSystemScanner.MapLogText(fileText);
                 }
             }
             catch (Exception ex)
             {
+                logErrors = new List<LogError>();
                 string error = string.Format("Hubo un problema con el proceso. {0}. {1}.", ex.Message, ex.InnerException?.ToString());
                 _eventLog.CrearLog(error);
             }
+
+            return logErrors;
         }
 
-        private void VisitarDirectorio(string path)
+        private List<LogError> VisitarDirectorio(string path)
         {
+            List<LogError> logErrors = new List<LogError>();
             _eventLog.CrearLog("Buscando archivos de log en directorio: " + path);
             try
             {
@@ -94,55 +108,88 @@ namespace MonitorWindowsService.WS.Procesos
                     //List<LogError> logErrors = FileSystemScanner.MapLog(lines);
                     // Metodo para archivos divididos por comas.
                     string fileText = File.ReadAllText(filename);
-                    
-                    List<LogError> logErrors = FileSystemScanner.MapLogText(fileText);
-                    if (logErrors.Count > 0)
-                    {
-                        logErrors.ForEach(RegistrarExcepcion);
-                    }
+
+                    logErrors = FileSystemScanner.MapLogText(fileText);
                 }
             }
             catch (Exception ex)
             {
+                logErrors = new List<LogError>();
                 string error = string.Format("Hubo un problema con el proceso. {0}. {1}.", ex.Message, ex.InnerException?.ToString());
                 _eventLog.CrearLog(error);
             }
+
+            return logErrors;
         }
 
-        private void RegistrarExcepcion(LogError logError)
+        private RespuestaModel RegistrarExcepcion(List<LogError> logErrors, int SistemaId)
         {
-            Dictionary<string, dynamic> parametros = MapearLogDiccionario(logError);            
-        }
+            List<Excepcion> list = MapearLogs(logErrors, SistemaId);
 
-        private Dictionary<string, dynamic> MapearLogDiccionario(LogError logError)
-        {
-            Dictionary<string, dynamic> P = new Dictionary<string, dynamic>();
-            
-            string jsonString = JsonConvert.SerializeObject(logError);
-            Excepcion m = new Excepcion
+            try
             {
-                Error = logError.Error,
-                ErrorDescripcion = logError.ErrorDescription,
-                ErrorNumero = logError.ErrorNumber,
-                FechaOcurrencia = logError.FechaRegistro,
-                LogText = jsonString,
-                Pagina = logError.Page,
-                Servidor = logError.ServerName,
-                SistemaId = SistemaId,
-                UsuarioCreacionId = 100
-            };
-
-            var props = m.GetType().GetProperties();
-
-            foreach (PropertyInfo prop in props)
+                foreach (Excepcion excepcion in list)
+                {
+                    Dictionary<string, dynamic> P = excepcion.AsDictionary();
+                    m = _dao.Insertar<RespuestaModel>(P);
+                }
+            }
+            catch (Exception ex)
             {
-                string Key = prop.Name.ToString();
-                dynamic Value = m.GetType().GetProperty(Key).GetValue(m, null);
-
-                P.Add(Key, Value);
+                m.Id = 0;
+                m.ErrorId = -2;
+                m.Satisfactorio = false;
+                m.Datos = null;
+                m.Mensaje = ex.Message + ". " + ex.InnerException;
             }
 
-            return P;
+            return m;
+        }
+
+        private void ActualizarVisitaConfiguracion(int Opcion, int ExcepcionConfiguracionId, int UsuarioModificacionId, bool Baja, out RespuestaModel res)
+        {
+            res = new RespuestaModel();
+            Dictionary<string, dynamic> P = new Dictionary<string, dynamic> {
+                { "ExcepcionConfiguracionId", ExcepcionConfiguracionId },
+                { "UsuarioModificacionId", UsuarioModificacionId },
+                { "Baja", Baja },
+                { "Opcion", Opcion }
+            };
+
+            try
+            {
+                res = _dao.Actualizar<RespuestaModel>(P);
+            }
+            catch (Exception ex)
+            {
+                res.Id = 0;
+                res.ErrorId = -2;
+                res.Satisfactorio = false;
+                res.Datos = null;
+                res.Mensaje = ex.Message + ". " + ex.InnerException;
+            }
+        }
+
+        private static List<Excepcion> MapearLogs(List<LogError> logErrors, int SistemaId)
+        {
+            List<Excepcion> list = new List<Excepcion>();
+            logErrors.ForEach(x =>
+            {
+                string logText = JsonConvert.SerializeObject(x);
+                list.Add(new Excepcion()
+                {
+                    Error = x.Error,
+                    ErrorDescripcion = x.ErrorDescription,
+                    ErrorNumero = x.ErrorNumber,
+                    FechaOcurrencia = x.FechaRegistro,
+                    LogText = logText,
+                    Pagina = x.Page,
+                    Servidor = x.ServerName,
+                    SistemaId = SistemaId,
+                    UsuarioCreacionId = 1
+                });
+            });
+            return list;
         }
     }
 }
