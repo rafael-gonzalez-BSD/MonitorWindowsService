@@ -99,7 +99,6 @@
   <ItemGroup>
     <Content Include="Logs\Ejecuciones\BitacoraEjecucionLog.txt" />
     <Content Include="Logs\Excepciones\LogError_2001.txt" />
-    <Content Include="Logs\LogError_2001.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
