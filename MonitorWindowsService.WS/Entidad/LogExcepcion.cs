@@ -2,7 +2,7 @@
 
 namespace MonitorWindowsService.WS.Entidad
 {
-    public class LogError
+    public class LogExcepcion
     {
         public DateTime FechaRegistro { get; set; }
         public int? ProcesoId { get; set; }

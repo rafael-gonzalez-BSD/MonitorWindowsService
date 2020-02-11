@@ -25,7 +25,7 @@ namespace MonitorWindowsService.WS.Procesos
         public void Start_Visitas()
         {
             RespuestaModel res = new RespuestaModel();
-            List<LogError> logErrors;
+            List<LogExcepcion> logErrors;
             _eventLog.CrearLog("Inicio del servicio de Exepciones");
             try
             {
@@ -68,9 +68,9 @@ namespace MonitorWindowsService.WS.Procesos
             }
         }
 
-        private List<LogError> VisitarRuta(string RutaLog)
+        private List<LogExcepcion> VisitarRuta(string RutaLog)
         {
-            List<LogError> logErrors = new List<LogError>();
+            List<LogExcepcion> logErrors = new List<LogExcepcion>();
             _eventLog.CrearLog("Buscando archivos de log en la ruta: " + RutaLog);
             try
             {
@@ -78,14 +78,15 @@ namespace MonitorWindowsService.WS.Procesos
                 foreach (string filename in files.Where(x => x.Contains(".txt")))
                 {
                     _eventLog.CrearLog("Leyendo el archivo: " + filename);
-                    string urlFile = Path.Combine(RutaLog, filename);
+                    string[] filenameArray = filename.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+                    string urlFile = Path.Combine(RutaLog, filenameArray[filenameArray.Length - 1]);
                     string fileText = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
-                    logErrors = FileSystemScanner.MapLogText(fileText);
+                    logErrors = FileSystemScanner.MapLogText<LogExcepcion>(fileText);
                 }
             }
             catch (Exception ex)
             {
-                logErrors = new List<LogError>();
+                logErrors = new List<LogExcepcion>();
                 string error = string.Format("Hubo un problema con el proceso. {0}. {1}.", ex.Message, ex.InnerException?.ToString());
                 _eventLog.CrearLog(error);
             }
@@ -93,14 +94,14 @@ namespace MonitorWindowsService.WS.Procesos
             return logErrors;
         }
 
-        private List<LogError> VisitarDirectorio(string path)
+        private List<LogExcepcion> VisitarDirectorio(string path)
         {
-            List<LogError> logErrors = new List<LogError>();
+            List<LogExcepcion> logErrors = new List<LogExcepcion>();
             _eventLog.CrearLog("Buscando archivos de log en directorio: " + path);
             try
             {
                 List<string> files = FileSystemScanner.PathDirectoryDownload(path, out string mensaje);
-                foreach (string filename in files)
+                foreach (string filename in files.Where(x => x.Contains(".txt")))
                 {
                     _eventLog.CrearLog("Leyendo el archivo: " + filename);
                     // Metodo para archivos no divididos con comas
@@ -109,12 +110,12 @@ namespace MonitorWindowsService.WS.Procesos
                     // Metodo para archivos divididos por comas.
                     string fileText = File.ReadAllText(filename);
 
-                    logErrors = FileSystemScanner.MapLogText(fileText);
+                    logErrors = FileSystemScanner.MapLogText<LogExcepcion>(fileText);
                 }
             }
             catch (Exception ex)
             {
-                logErrors = new List<LogError>();
+                logErrors = new List<LogExcepcion>();
                 string error = string.Format("Hubo un problema con el proceso. {0}. {1}.", ex.Message, ex.InnerException?.ToString());
                 _eventLog.CrearLog(error);
             }
@@ -122,7 +123,7 @@ namespace MonitorWindowsService.WS.Procesos
             return logErrors;
         }
 
-        private RespuestaModel RegistrarExcepcion(List<LogError> logErrors, int SistemaId)
+        private RespuestaModel RegistrarExcepcion(List<LogExcepcion> logErrors, int SistemaId)
         {
             List<Excepcion> list = MapearLogs(logErrors, SistemaId);
 
@@ -170,7 +171,7 @@ namespace MonitorWindowsService.WS.Procesos
             }
         }
 
-        private static List<Excepcion> MapearLogs(List<LogError> logErrors, int SistemaId)
+        private static List<Excepcion> MapearLogs(List<LogExcepcion> logErrors, int SistemaId)
         {
             List<Excepcion> list = new List<Excepcion>();
             logErrors.ForEach(x =>

@@ -109,11 +109,11 @@ namespace MonitorWindowsService.WS.Utils
             return completeFile;
         }
 
-        public static List<LogError> MapLog(List<string> list)
+        public static List<LogExcepcion> MapLog(List<string> list)
         {
-            List<LogError> listLogs = new List<LogError>();
-            LogError log = new LogError();
-            PropertyInfo[] properties = typeof(LogError).GetProperties();
+            List<LogExcepcion> listLogs = new List<LogExcepcion>();
+            LogExcepcion log = new LogExcepcion();
+            PropertyInfo[] properties = typeof(LogExcepcion).GetProperties();
 
             var types = new Type[] { typeof(DateTime), typeof(int), typeof(double), typeof(string) };
 
@@ -150,18 +150,18 @@ namespace MonitorWindowsService.WS.Utils
                 if (x.StartsWith("}"))
                 {
                     listLogs.Add(log);
-                    log = new LogError();
+                    log = new LogExcepcion();
                 }
             });
 
             return listLogs;
         }
 
-        public static List<LogError> MapLogText(string fileText)
+        public static List<T> MapLogText<T>(string fileText)
         {
             string completeFile = string.Format("[{0}]", fileText);
 
-            return JsonConvert.DeserializeObject<List<LogError>>(completeFile);
+            return JsonConvert.DeserializeObject<List<T>>(completeFile);
         }
     }
 }

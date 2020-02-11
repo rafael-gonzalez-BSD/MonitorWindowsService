@@ -58,10 +58,13 @@
   <ItemGroup>
     <Compile Include="Datos\Base\DBConnection.cs" />
     <Compile Include="Datos\Base\Disposable.cs" />
+    <Compile Include="Datos\Implementacion\EjecucionDao.cs" />
     <Compile Include="Datos\Implementacion\ExcepcionDao.cs" />
     <Compile Include="Entidad\Configuracion.cs" />
+    <Compile Include="Entidad\Ejecucion.cs" />
     <Compile Include="Entidad\Excepcion.cs" />
-    <Compile Include="Entidad\LogError.cs" />
+    <Compile Include="Entidad\LogEjecucion.cs" />
+    <Compile Include="Entidad\LogExcepcion.cs" />
     <Compile Include="Entidad\RespuestaModel.cs" />
     <Compile Include="Enum\ServiceState.cs" />
     <Compile Include="ProcesoLog.cs">

@@ -1,6 +1,4 @@
-﻿using System.ServiceProcess;
-
-namespace MonitorWindowsService.WS
+﻿namespace MonitorWindowsService.WS
 {
     internal static class Program
     {
