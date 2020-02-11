@@ -9,3 +9,15 @@
 /MonitorWindowsService.WS/bin/Release
 /MonitorWindowsService.WS/obj/Release
 /packages/Newtonsoft.Json.12.0.3
+/MonitorWindowsService.Datos/bin/Debug
+/MonitorWindowsService.Datos/obj/Debug
+/MonitorWindowsService.Entidad/bin/Debug
+/MonitorWindowsService.Entidad/obj/Debug
+/MonitorWindowsService.Utils/bin/Debug
+/MonitorWindowsService.Utils/obj/Debug
+/MonitorWindowsService.Enum/bin/Debug
+/MonitorWindowsService.Enum/obj/Debug
+/MonitorWindowsService.LogEjecuciones/bin/Debug
+/MonitorWindowsService.LogEjecuciones/obj/Debug
+/MonitorWindowsService.LogExcepciones/bin/Debug
+/MonitorWindowsService.LogExcepciones/obj/Debug
