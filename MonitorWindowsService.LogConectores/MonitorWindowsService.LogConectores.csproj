@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{69F18833-DB06-4F59-9B5F-1A437F7AD4CB}</ProjectGuid>
+    <ProjectGuid>{EF66FAA7-90AA-4AFC-B6F9-0D335242C873}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MonitorWindowsService.WS</RootNamespace>
-    <AssemblyName>MonitorWindowsService.WS</AssemblyName>
+    <RootNamespace>MonitorWindowsService.LogConectores</RootNamespace>
+    <AssemblyName>MonitorWindowsService.LogConectores</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,21 +32,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>MonitorWindowsService.WS.Program</StartupObject>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dapper.2.0.30\lib\net461\Dapper.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,52 +47,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Datos\Base\DBConnection.cs" />
-    <Compile Include="Datos\Base\Disposable.cs" />
-    <Compile Include="Datos\Implementacion\EjecucionDao.cs" />
-    <Compile Include="Datos\Implementacion\ExcepcionDao.cs" />
-    <Compile Include="Entidad\Configuracion.cs" />
-    <Compile Include="Entidad\Ejecucion.cs" />
-    <Compile Include="Entidad\Excepcion.cs" />
-    <Compile Include="Entidad\LogEjecucion.cs" />
-    <Compile Include="Entidad\LogExcepcion.cs" />
-    <Compile Include="Entidad\RespuestaModel.cs" />
-    <Compile Include="Enum\ServiceState.cs" />
+    <Compile Include="Conectores.cs" />
     <Compile Include="ProcesoLog.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ProcesoLog.Designer.cs">
       <DependentUpon>ProcesoLog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Procesos\Ejecuciones.cs" />
-    <Compile Include="Procesos\Excepciones.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="ProjectInstaller.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ProjectInstaller.Designer.cs">
-      <DependentUpon>ProjectInstaller.cs</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\FileSystemScanner.cs" />
-    <Compile Include="Utils\Log.cs" />
-    <Compile Include="Utils\MappingExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ProcesoLog.resx">
-      <DependentUpon>ProcesoLog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ProjectInstaller.resx">
-      <DependentUpon>ProjectInstaller.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Logs\Ejecuciones\BitacoraEjecucionLog.txt" />
-    <Content Include="Logs\Excepciones\LogError_2001.txt" />
+    <ProjectReference Include="..\MonitorWindowsService.Datos\MonitorWindowsService.Datos.csproj">
+      <Project>{9A69A174-FB13-41A0-94D2-4294CE18143C}</Project>
+      <Name>MonitorWindowsService.Datos</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonitorWindowsService.Entidad\MonitorWindowsService.Entidad.csproj">
+      <Project>{31834720-EA90-4D66-B85A-B65FE2C65DCB}</Project>
+      <Name>MonitorWindowsService.Entidad</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonitorWindowsService.Utils\MonitorWindowsService.Utils.csproj">
+      <Project>{E8B68847-EB7D-4FA0-B4D1-8BC5D99680F5}</Project>
+      <Name>MonitorWindowsService.Utils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

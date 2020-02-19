@@ -1,25 +1,25 @@
-﻿using MonitorWindowsService.WS.Datos.Implementacion;
-using MonitorWindowsService.WS.Entidad;
-using MonitorWindowsService.WS.Utils;
+﻿using MonitorWindowsService.Datos.Implementacion;
+using MonitorWindowsService.Entidad;
+using MonitorWindowsService.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace MonitorWindowsService.WS.Procesos
+namespace MonitorWindowsService.LogConectores
 {
-    public class Excepciones
+    public class Conectores
     {
-        private readonly ExcepcionDao _dao;
+        private readonly ConectorDao _dao;
         private readonly Log _eventLog;
         private RespuestaModel m;
 
-        public Excepciones()
+        public Conectores()
         {
             m = new RespuestaModel();
-            _dao = new ExcepcionDao();
-            _eventLog = new Log("Proceso de Excepciones", "Servicio de Monitor de Procesos");
+            _dao = new ConectorDao();
+            _eventLog = new Log("Proceso de Conectores", "Servicio de Monitor de Procesos");
         }
 
         public void Start_Visitas()
@@ -81,7 +81,7 @@ namespace MonitorWindowsService.WS.Procesos
                     string[] filenameArray = filename.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
                     string urlFile = Path.Combine(RutaLog, filenameArray[filenameArray.Length - 1]);
                     string fileText = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
-                    logErrors = FileSystemScanner.MapLogText<LogExcepcion>(fileText);
+                    logErrors.AddRange(FileSystemScanner.MapLogText<LogExcepcion>(fileText));
                 }
             }
             catch (Exception ex)
@@ -104,13 +104,9 @@ namespace MonitorWindowsService.WS.Procesos
                 foreach (string filename in files.Where(x => x.Contains(".txt")))
                 {
                     _eventLog.CrearLog("Leyendo el archivo: " + filename);
-                    // Metodo para archivos no divididos con comas
-                    //List<string> lines = File.ReadAllLines(filename).ToList();
-                    //List<LogError> logErrors = FileSystemScanner.MapLog(lines);
-                    // Metodo para archivos divididos por comas.
                     string fileText = File.ReadAllText(filename);
 
-                    logErrors = FileSystemScanner.MapLogText<LogExcepcion>(fileText);
+                    logErrors.AddRange(FileSystemScanner.MapLogText<LogExcepcion>(fileText));
                 }
             }
             catch (Exception ex)

@@ -1,11 +1,9 @@
-﻿using MonitorWindowsService.Entidad;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -107,54 +105,6 @@ namespace MonitorWindowsService.Utils
             }
 
             return completeFile;
-        }
-
-        public static List<LogExcepcion> MapLog(List<string> list)
-        {
-            List<LogExcepcion> listLogs = new List<LogExcepcion>();
-            LogExcepcion log = new LogExcepcion();
-            PropertyInfo[] properties = typeof(LogExcepcion).GetProperties();
-
-            var types = new Type[] { typeof(DateTime), typeof(int), typeof(double), typeof(string) };
-
-            list.ForEach(x =>
-            {
-                x = x.Replace(": ", ":").Replace(",", "").Replace('"', ' ').Trim();
-                if (x.EndsWith(":"))
-                {
-                    x = x + " ";
-                }
-                if (!x.StartsWith("{"))
-                {
-                    foreach (PropertyInfo property in properties)
-                    {
-                        string[] prueba = x.Split(new string[] { " : " }, StringSplitOptions.None);
-                        if (property.Name.Contains(prueba[0].Trim()))
-                        {
-                            foreach (var type in types)
-                            {
-                                try
-                                {
-                                    dynamic value = Convert.ChangeType(string.IsNullOrEmpty(prueba[1].Trim()) ? "0" : prueba[1].Trim(), type);
-                                    log.GetType().GetProperty(property.Name).SetValue(log, value);
-                                    break;
-                                }
-                                catch { }
-                            }
-
-                            break;
-                        }
-                    }
-                }
-
-                if (x.StartsWith("}"))
-                {
-                    listLogs.Add(log);
-                    log = new LogExcepcion();
-                }
-            });
-
-            return listLogs;
         }
 
         public static List<T> MapLogText<T>(string fileText)

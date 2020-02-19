@@ -10,9 +10,7 @@ namespace MonitorWindowsService.Entidad
 
         public string Servidor { get; set; }
 
-        public DateTime FechaInicio { get; set; }
-
-        public DateTime FechaFin { get; set; }
+        public DateTime FechaOcurrencia { get; set; }
 
         public int EjecucionTipoId { get; set; }
 

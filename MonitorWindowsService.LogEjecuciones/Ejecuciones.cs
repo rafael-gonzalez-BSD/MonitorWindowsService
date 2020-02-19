@@ -1,4 +1,5 @@
-﻿using MonitorWindowsService.Datos.Implementacion;
+﻿using MonitorWindowsService.Datos.Base;
+using MonitorWindowsService.Datos.Implementacion;
 using MonitorWindowsService.Entidad;
 using MonitorWindowsService.Utils;
 using System;
@@ -8,7 +9,7 @@ using System.Linq;
 
 namespace MonitorWindowsService.LogEjecuciones
 {
-    public class Ejecuciones
+    public class Ejecuciones : Disposable
     {
         private readonly EjecucionDao _dao;
         private readonly Log _eventLog;
@@ -80,7 +81,7 @@ namespace MonitorWindowsService.LogEjecuciones
                     string[] filenameArray = filename.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
                     string urlFile = Path.Combine(RutaLog, filenameArray[filenameArray.Length - 1]);
                     string fileText = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
-                    logErrors = FileSystemScanner.MapLogText<LogEjecucion>(fileText);
+                    logErrors.AddRange(FileSystemScanner.MapLogText<LogEjecucion>(fileText));
                 }
             }
             catch (Exception ex)
@@ -103,13 +104,9 @@ namespace MonitorWindowsService.LogEjecuciones
                 foreach (string filename in files.Where(x => x.Contains(".txt")))
                 {
                     _eventLog.CrearLog("Leyendo el archivo: " + filename);
-                    // Metodo para archivos no divididos con comas
-                    //List<string> lines = File.ReadAllLines(filename).ToList();
-                    //List<LogError> logErrors = FileSystemScanner.MapLog(lines);
-                    // Metodo para archivos divididos por comas.
                     string fileText = File.ReadAllText(filename);
 
-                    logErrors = FileSystemScanner.MapLogText<LogEjecucion>(fileText);
+                    logErrors.AddRange(FileSystemScanner.MapLogText<LogEjecucion>(fileText));
                 }
             }
             catch (Exception ex)
@@ -128,7 +125,7 @@ namespace MonitorWindowsService.LogEjecuciones
 
             try
             {
-                foreach (Ejecucion ejecucion in list)
+                foreach (Ejecucion ejecucion in list.OrderBy(x => x.EjecucionTipoId))
                 {
                     Dictionary<string, dynamic> P = ejecucion.AsDictionary();
                     m = _dao.Insertar<RespuestaModel>(P);
@@ -177,9 +174,9 @@ namespace MonitorWindowsService.LogEjecuciones
             {
                 list.Add(new Ejecucion()
                 {
-                    EjecucionDetalleDescripcion = "Dato tomado desde el archivo",
-                    FechaFin = x.FechaFin,
-                    FechaInicio = x.FechaInicio,
+                    EjecucionTipoId = x.Evento == "Inicio" ? 1 : 2,
+                    EjecucionDetalleDescripcion = x.Proceso,
+                    FechaOcurrencia = x.Fecha,
                     ProcesoId = x.ProcesoId,
                     Servidor = x.ServerName,
                     SistemaId = SistemaId,

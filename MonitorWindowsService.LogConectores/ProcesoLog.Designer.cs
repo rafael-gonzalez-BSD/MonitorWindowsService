@@ -1,4 +1,4 @@
-﻿namespace MonitorWindowsService.WS
+﻿namespace MonitorWindowsService.LogConectores
 {
     partial class ProcesoLog
     {
@@ -28,18 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.eventLog1 = new System.Diagnostics.EventLog();
-            ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).BeginInit();
-            // 
-            // ProcesoLog
-            // 
-            this.ServiceName = "ProcesoLog";
-            ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).EndInit();
-
+            components = new System.ComponentModel.Container();
+            this.ServiceName = "Service1";
         }
 
         #endregion
-
-        private System.Diagnostics.EventLog eventLog1;
     }
 }

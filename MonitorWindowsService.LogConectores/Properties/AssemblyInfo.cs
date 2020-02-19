@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MonitorWindowsService.WS")]
+[assembly: AssemblyTitle("MonitorWindowsService.LogConectores")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MonitorWindowsService.WS")]
+[assembly: AssemblyProduct("MonitorWindowsService.LogConectores")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("69f18833-db06-4f59-9b5f-1a437f7ad4cb")]
+[assembly: Guid("ef66faa7-90aa-4afc-b6f9-0d335242c873")]
 
 // Version information for an assembly consists of the following four values:
 //

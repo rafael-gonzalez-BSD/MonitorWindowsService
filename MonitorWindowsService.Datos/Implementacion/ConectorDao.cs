@@ -1,9 +1,9 @@
-﻿using MonitorWindowsService.WS.Datos.Base;
+﻿using MonitorWindowsService.Datos.Base;
 using System.Collections.Generic;
 
-namespace MonitorWindowsService.WS.Datos.Implementacion
+namespace MonitorWindowsService.Datos.Implementacion
 {
-    public class ExcepcionDao : Disposable
+    public class ConectorDao : Disposable
     {
         #region ===== Variables =====
 
@@ -13,7 +13,7 @@ namespace MonitorWindowsService.WS.Datos.Implementacion
 
         #region ==== Constructores ====
 
-        public ExcepcionDao()
+        public ConectorDao()
         {
             _db = new DBConnection("Default");
         }
@@ -24,17 +24,17 @@ namespace MonitorWindowsService.WS.Datos.Implementacion
 
         public IEnumerable<T> Consultar<T>(Dictionary<string, dynamic> P)
         {
-            return _db.Query<T>(P, "[Bitacora].[spExcepcionConfiguracion_Consultar]");
+            return _db.Query<T>(P, "[Bitacora].[spConectorConfiguracion_Consultar]");
         }
 
         public T Insertar<T>(Dictionary<string, dynamic> P)
         {
-            return _db.QuerySingle<T>(P, "[Bitacora].[spRegistrarExcepciones_Insertar]");
+            return _db.QuerySingle<T>(P, "[Bitacora].[spRegistrarConectores_Insertar]");
         }
 
         public T Actualizar<T>(Dictionary<string, dynamic> P)
         {
-            return _db.QuerySingle<T>(P, "[Bitacora].[spExcepcionConfiguracion_Actualizar]");
+            return _db.QuerySingle<T>(P, "[Bitacora].[spConectorConfiguracion_Actualizar]");
         }
 
         #endregion ==== Metodos ====

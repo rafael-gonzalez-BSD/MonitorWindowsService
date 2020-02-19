@@ -1,4 +1,4 @@
-﻿namespace MonitorWindowsService.WS
+﻿namespace MonitorWindowsService.LogConectores
 {
     internal static class Program
     {
@@ -15,8 +15,8 @@
             };
             ServiceBase.Run(ServicesToRun);
 #else
-            Procesos.Excepciones excepciones = new Procesos.Excepciones();
-            excepciones.Start_Visitas();
+            Conectores conectores = new Conectores();
+            conectores.Start_Visitas();
 
 #endif
         }

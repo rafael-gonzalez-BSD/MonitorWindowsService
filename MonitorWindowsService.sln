@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitorWindowsService.LogEj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitorWindowsService.LogExcepciones", "MonitorWindowsService.LogExcepciones\MonitorWindowsService.LogExcepciones.csproj", "{BC5F9FEB-86DD-4730-B362-13929F593FE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitorWindowsService.LogConectores", "MonitorWindowsService.LogConectores\MonitorWindowsService.LogConectores.csproj", "{EF66FAA7-90AA-4AFC-B6F9-0D335242C873}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{BC5F9FEB-86DD-4730-B362-13929F593FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC5F9FEB-86DD-4730-B362-13929F593FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC5F9FEB-86DD-4730-B362-13929F593FE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF66FAA7-90AA-4AFC-B6F9-0D335242C873}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF66FAA7-90AA-4AFC-B6F9-0D335242C873}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF66FAA7-90AA-4AFC-B6F9-0D335242C873}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF66FAA7-90AA-4AFC-B6F9-0D335242C873}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
