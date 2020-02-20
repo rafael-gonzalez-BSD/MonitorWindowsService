@@ -48,6 +48,7 @@
     <Compile Include="Log.cs" />
     <Compile Include="MappingExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequestApiExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonitorWindowsService.Entidad\MonitorWindowsService.Entidad.csproj">

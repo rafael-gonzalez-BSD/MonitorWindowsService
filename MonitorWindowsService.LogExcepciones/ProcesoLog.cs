@@ -1,5 +1,4 @@
 ﻿using MonitorWindowsService.Enum;
-using MonitorWindowsService.LogEjecuciones;
 using MonitorWindowsService.Utils;
 using System;
 using System.Configuration;
@@ -14,7 +13,7 @@ namespace MonitorWindowsService.LogExcepciones
     {
         private int eventId = 1;
         private int segundos = Convert.ToInt32(ConfigurationManager.AppSettings["TiempoIntervalo"]);
-        private Ejecuciones ejecuciones;
+        private Excepciones excepciones;
         private readonly Log _eventLog;
 
         public ProcesoLog()
@@ -22,7 +21,7 @@ namespace MonitorWindowsService.LogExcepciones
             InitializeComponent();
             _eventLog = new Log("Estatus de Servicio", "Servicio de Monitor de Procesos");
 
-            ejecuciones = new Ejecuciones();
+            excepciones = new Excepciones();
         }
 
         protected override void OnStart(string[] args)
@@ -68,7 +67,7 @@ namespace MonitorWindowsService.LogExcepciones
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
             _eventLog.CrearLog("Monitoreando El Sistema", EventLogEntryType.Information, eventId++);
-            ejecuciones.Start_Visitas();
+            excepciones.Start_Visitas();
         }
 
         protected override void OnContinue()
