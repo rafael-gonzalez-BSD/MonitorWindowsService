@@ -1,4 +1,6 @@
-﻿namespace MonitorWindowsService.LogExcepciones
+﻿using System.ServiceProcess;
+
+namespace MonitorWindowsService.LogExcepciones
 {
     internal static class Program
     {

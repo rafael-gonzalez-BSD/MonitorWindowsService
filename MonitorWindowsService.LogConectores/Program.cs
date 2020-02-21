@@ -1,4 +1,6 @@
-﻿namespace MonitorWindowsService.LogConectores
+﻿using System.ServiceProcess;
+
+namespace MonitorWindowsService.LogConectores
 {
     internal static class Program
     {

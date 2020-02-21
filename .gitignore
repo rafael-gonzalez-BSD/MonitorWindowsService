@@ -23,3 +23,17 @@
 /MonitorWindowsService.LogExcepciones/obj/Debug
 /MonitorWindowsService.LogConectores/bin/Debug
 /MonitorWindowsService.LogConectores/obj/Debug
+/MonitorWindowsService.Datos/obj/Release
+/MonitorWindowsService.Entidad/obj/Release
+/MonitorWindowsService.Enum/obj/Release
+/MonitorWindowsService.LogConectores/obj/Release
+/MonitorWindowsService.LogEjecuciones/obj/Release
+/MonitorWindowsService.Utils/obj/Release
+/MonitorWindowsService.LogExcepciones/obj/Release
+/MonitorWindowsService.Datos/bin/Release
+/MonitorWindowsService.Entidad/bin/Release
+/MonitorWindowsService.Enum/bin/Release
+/MonitorWindowsService.LogConectores/bin/Release
+/MonitorWindowsService.LogEjecuciones/bin/Release
+/MonitorWindowsService.LogExcepciones/bin/Release
+/MonitorWindowsService.Utils/bin/Release

@@ -1,4 +1,6 @@
-﻿namespace MonitorWindowsService.LogEjecuciones
+﻿using System.ServiceProcess;
+
+namespace MonitorWindowsService.LogEjecuciones
 {
     internal static class Program
     {
