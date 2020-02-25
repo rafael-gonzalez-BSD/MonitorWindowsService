@@ -33,7 +33,7 @@
             // 
             // ProcesoLog
             // 
-            this.ServiceName = "Service1";
+            this.ServiceName = "LogExcepciones";
             ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).EndInit();
 
         }

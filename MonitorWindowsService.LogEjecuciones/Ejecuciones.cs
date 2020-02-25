@@ -12,6 +12,7 @@ namespace MonitorWindowsService.LogEjecuciones
     public class Ejecuciones : Disposable
     {
         private readonly EjecucionDao _dao;
+        private readonly EjecucionConfiguracionLecturaDao _daoLectura;
         private readonly Log _eventLog;
         private RespuestaModel m;
 
@@ -19,12 +20,15 @@ namespace MonitorWindowsService.LogEjecuciones
         {
             m = new RespuestaModel();
             _dao = new EjecucionDao();
+            _daoLectura = new EjecucionConfiguracionLecturaDao();
             _eventLog = new Log("Proceso de Ejecuciones", "Servicio de Monitor de Procesos");
         }
 
         public void Start_Visitas()
         {
             RespuestaModel res = new RespuestaModel();
+            List<string> filenames;
+            bool existenLeidos;
             List<LogEjecucion> logErrors;
             _eventLog.CrearLog("Inicio del servicio de Ejecuciones");
             try
@@ -40,7 +44,7 @@ namespace MonitorWindowsService.LogEjecuciones
                     {
                         if (item.RutaLog.Substring(0, 7).Contains("http://") || item.RutaLog.Substring(0, 8).Contains("https://"))
                         {
-                            logErrors = VisitarRuta(item.RutaLog);
+                            logErrors = VisitarRuta(item.RutaLog, item.ConfiguracionId, out filenames, out existenLeidos);
                             if (logErrors.Count > 0)
                             {
                                 res = RegistrarEjecucion(logErrors, item.SistemaId);
@@ -48,7 +52,7 @@ namespace MonitorWindowsService.LogEjecuciones
                         }
                         else
                         {
-                            logErrors = VisitarDirectorio(item.RutaLog);
+                            logErrors = VisitarDirectorio(item.RutaLog, item.ConfiguracionId, out filenames, out existenLeidos);
                             if (logErrors.Count > 0)
                             {
                                 res = RegistrarEjecucion(logErrors, item.SistemaId);
@@ -57,6 +61,14 @@ namespace MonitorWindowsService.LogEjecuciones
 
                         if (res.Satisfactorio)
                         {
+                            if (existenLeidos)
+                            {
+                                ActualizarArchivosLeidos(3, filenames, logErrors.Count, item.ConfiguracionId, false, out res);
+                            }
+                            else
+                            {
+                                RegistrarArchivosLeidos(1, filenames, logErrors.Count, item.ConfiguracionId, false, out res);
+                            }
                             ActualizarVisitaConfiguracion(4, item.ConfiguracionId, 1, false, out m);
                         }
                     }
@@ -68,9 +80,11 @@ namespace MonitorWindowsService.LogEjecuciones
             }
         }
 
-        private List<LogEjecucion> VisitarRuta(string RutaLog)
+        private List<LogEjecucion> VisitarRuta(string RutaLog, int EjecucionConfiguracionId, out List<string> filenames, out bool existenLeidos)
         {
             List<LogEjecucion> logErrors = new List<LogEjecucion>();
+            filenames = new List<string>();
+            existenLeidos = false;
             _eventLog.CrearLog("Buscando archivos de log en la ruta: " + RutaLog);
             try
             {
@@ -79,9 +93,32 @@ namespace MonitorWindowsService.LogEjecuciones
                 {
                     _eventLog.CrearLog("Leyendo el archivo: " + filename);
                     string[] filenameArray = filename.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-                    string urlFile = Path.Combine(RutaLog, filenameArray[filenameArray.Length - 1]);
-                    string fileText = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
-                    logErrors.AddRange(FileSystemScanner.MapLogText<LogEjecucion>(fileText));
+                    string filenameI = filenameArray[filenameArray.Length - 1];
+                    if (filenameI != "LogEjec.txt" && ValidarFechaArchivo(filenameI))
+                    {
+                        _eventLog.CrearLog("Obteniendo la bitacora de logs leidos de: " + filename);
+
+                        Dictionary<string, dynamic> P = new Dictionary<string, dynamic> {
+                            { "Opcion", 2 },
+                            { "EjecucionConfiguracionId", EjecucionConfiguracionId },
+                            { "EjecucionConfiguracionLecturaDescripcion", filenameI},
+                            {"Baja", false }
+                        };
+
+                        List<EjecucionConfiguracionLectura> lectura = _daoLectura.Consultar<EjecucionConfiguracionLectura>(P).ToList();
+
+                        string urlFile = Path.Combine(RutaLog, filenameI);
+                        string fileText = FileSystemScanner.GetLogFile(urlFile, out string mensajeArchivo);
+                        logErrors.AddRange(FileSystemScanner.MapLogText<LogEjecucion>(fileText));
+
+                        if (lectura.Any())
+                        {
+                            existenLeidos = true;
+                            logErrors = logErrors.OrderBy(x => x.Fecha).Skip(lectura[0].NumeroRegistros).ToList();
+                        }
+
+                        filenames.Add(filenameI);
+                    }
                 }
             }
             catch (Exception ex)
@@ -94,19 +131,44 @@ namespace MonitorWindowsService.LogEjecuciones
             return logErrors;
         }
 
-        private List<LogEjecucion> VisitarDirectorio(string path)
+        private List<LogEjecucion> VisitarDirectorio(string path, int EjecucionConfiguracionId, out List<string> filenames, out bool existenLeidos)
         {
+            existenLeidos = false;
             List<LogEjecucion> logErrors = new List<LogEjecucion>();
+            filenames = new List<string>();
             _eventLog.CrearLog("Buscando archivos de log en directorio: " + path);
             try
             {
                 List<string> files = FileSystemScanner.PathDirectoryDownload(path, out string mensaje);
                 foreach (string filename in files.Where(x => x.Contains(".txt")))
                 {
-                    _eventLog.CrearLog("Leyendo el archivo: " + filename);
-                    string fileText = File.ReadAllText(filename);
+                    string[] filenameArray = filename.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
+                    string filenameI = filenameArray[filenameArray.Length - 1];
+                    if (filenameI != "LogEjec.txt" && ValidarFechaArchivo(filenameI))
+                    {
+                        _eventLog.CrearLog("Obteniendo la bitacora de logs leidos de: " + filename);
 
-                    logErrors.AddRange(FileSystemScanner.MapLogText<LogEjecucion>(fileText));
+                        Dictionary<string, dynamic> P = new Dictionary<string, dynamic> {
+                            { "Opcion", 2 },
+                            { "EjecucionConfiguracionId", EjecucionConfiguracionId },
+                            { "EjecucionConfiguracionLecturaDescripcion", filenameI},
+                            {"Baja", false }
+                        };
+
+                        List<EjecucionConfiguracionLectura> lectura = _daoLectura.Consultar<EjecucionConfiguracionLectura>(P).ToList();
+
+                        _eventLog.CrearLog("Leyendo el archivo: " + filename);
+                        string fileText = File.ReadAllText(filename);
+                        logErrors.AddRange(FileSystemScanner.MapLogText<LogEjecucion>(fileText));
+
+                        if (lectura.Any())
+                        {
+                            existenLeidos = true;
+                            logErrors = logErrors.OrderBy(x => x.Fecha).Skip(lectura[0].NumeroRegistros).ToList();
+                        }
+
+                        filenames.Add(filenameI);
+                    }
                 }
             }
             catch (Exception ex)
@@ -165,6 +227,61 @@ namespace MonitorWindowsService.LogEjecuciones
                 res.Datos = null;
                 res.Mensaje = ex.Message + ". " + ex.InnerException;
             }
+        }
+
+        private void RegistrarArchivosLeidos(int Opcion, List<string> filenames, int NumeroRegistros, int EjecucionConfiguracionId, bool Baja, out RespuestaModel res)
+        {
+            res = new RespuestaModel();
+            try
+            {
+                Dictionary<string, dynamic> P = new Dictionary<string, dynamic> {
+                    { "Opcion", Opcion },
+                    { "EjecucionConfiguracionId", EjecucionConfiguracionId },
+                    { "EjecucionConfiguracionLecturaDescripcion", filenames[filenames.Count - 1]},
+                    { "NumeroRegistros", NumeroRegistros},
+                    {"UsuarioCreacionId", 1 },
+                    {"Baja", Baja }
+                };
+
+                res = _daoLectura.Insertar<RespuestaModel>(P);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private void ActualizarArchivosLeidos(int Opcion, List<string> filenames, int NumeroRegistros, int EjecucionConfiguracionId, bool Baja, out RespuestaModel res)
+        {
+            res = new RespuestaModel();
+            try
+            {
+                Dictionary<string, dynamic> P = new Dictionary<string, dynamic> {
+                    { "Opcion", Opcion },
+                    { "EjecucionConfiguracionId", EjecucionConfiguracionId },
+                    { "EjecucionConfiguracionLecturaDescripcion", filenames[filenames.Count - 1]},
+                    { "NumeroRegistros", NumeroRegistros},
+                    {"UsuarioModificacionId", 1 },
+                    {"Baja", Baja }
+                };
+                res = _daoLectura.Actualizar<RespuestaModel>(P);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private bool ValidarFechaArchivo(string archivo)
+        {
+            string FechaHoy = DateTime.Now.Date.ToString("yyyyMMdd");
+            string FechaArchivo = archivo.Substring(7, 8);
+            if (FechaArchivo == FechaHoy)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static List<Ejecucion> MapearLogs(List<LogEjecucion> logErrors, int SistemaId)

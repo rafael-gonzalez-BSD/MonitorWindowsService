@@ -51,7 +51,9 @@
     <Compile Include="Base\DBConnection.cs" />
     <Compile Include="Base\Disposable.cs" />
     <Compile Include="Implementacion\ConectorDao.cs" />
+    <Compile Include="Implementacion\EjecucionConfiguracionLecturaDao.cs" />
     <Compile Include="Implementacion\EjecucionDao.cs" />
+    <Compile Include="Implementacion\ExcepcionConfiguracionLecturaDao.cs" />
     <Compile Include="Implementacion\ExcepcionDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

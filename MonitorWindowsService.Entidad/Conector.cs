@@ -8,8 +8,6 @@
 
         public string ConectorDetalleDescripcion { get; set; }
 
-        public string AlertaDescripcion { get; set; }
-
         public bool EjecucionSatisfactoria { get; set; }
 
         public int ConectorDetalleRespuestaId { get; set; }

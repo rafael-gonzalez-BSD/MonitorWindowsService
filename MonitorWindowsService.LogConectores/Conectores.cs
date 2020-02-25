@@ -121,7 +121,6 @@ namespace MonitorWindowsService.LogConectores
         {
             return new Conector()
             {
-                AlertaDescripcion = peticionModel.Descripcion,
                 ConectorDetalleDescripcion = peticionModel.Descripcion,
                 ConectorConfiguracionId = config.ConfiguracionId,
                 EjecucionSatisfactoria = (peticionModel.Clave == 1 || peticionModel.Clave == 2),
