@@ -37,3 +37,6 @@
 /MonitorWindowsService.LogEjecuciones/bin/Release
 /MonitorWindowsService.LogExcepciones/bin/Release
 /MonitorWindowsService.Utils/bin/Release
+/MonitorWindowsService.LogEjecuciones.Setup/Release
+/MonitorWindowsService.LogExcepciones.Setup/Debug
+/MonitorWindowsService.LogExcepciones.Setup/Release
