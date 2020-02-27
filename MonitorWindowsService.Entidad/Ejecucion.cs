@@ -17,5 +17,8 @@ namespace MonitorWindowsService.Entidad
         public int ProcesoId { get; set; }
 
         public int SistemaId { get; set; }
+
+        public int EjecucionConfiguracionId { get; set; }
+        public string NombreArchivo { get; set; }
     }
 }

@@ -47,7 +47,7 @@ namespace MonitorWindowsService.LogEjecuciones
                             logErrors = VisitarRuta(item.RutaLog, item.ConfiguracionId, out filenames, out existenLeidos);
                             if (logErrors.Count > 0)
                             {
-                                res = RegistrarEjecucion(logErrors, item.SistemaId);
+                                res = RegistrarEjecucion(logErrors, item.SistemaId, item.ConfiguracionId, filenames[filenames.Count - 1]);
                             }
                         }
                         else
@@ -55,11 +55,11 @@ namespace MonitorWindowsService.LogEjecuciones
                             logErrors = VisitarDirectorio(item.RutaLog, item.ConfiguracionId, out filenames, out existenLeidos);
                             if (logErrors.Count > 0)
                             {
-                                res = RegistrarEjecucion(logErrors, item.SistemaId);
+                                res = RegistrarEjecucion(logErrors, item.SistemaId, item.ConfiguracionId, filenames[filenames.Count - 1]);
                             }
                         }
 
-                        if (res.Satisfactorio)
+                        if (res.Satisfactorio && filenames.Count > 0)
                         {
                             if (existenLeidos)
                             {
@@ -181,13 +181,13 @@ namespace MonitorWindowsService.LogEjecuciones
             return logErrors;
         }
 
-        private RespuestaModel RegistrarEjecucion(List<LogEjecucion> logErrors, int SistemaId)
+        private RespuestaModel RegistrarEjecucion(List<LogEjecucion> logErrors, int SistemaId, int EjecucionConfiguracionId, string filename)
         {
-            List<Ejecucion> list = MapearLogs(logErrors, SistemaId);
+            List<Ejecucion> list = MapearLogs(logErrors, SistemaId, EjecucionConfiguracionId, filename);
 
             try
             {
-                foreach (Ejecucion ejecucion in list.OrderBy(x => x.EjecucionTipoId))
+                foreach (Ejecucion ejecucion in list.OrderBy(x => x.FechaOcurrencia))
                 {
                     Dictionary<string, dynamic> P = ejecucion.AsDictionary();
                     m = _dao.Insertar<RespuestaModel>(P);
@@ -284,7 +284,7 @@ namespace MonitorWindowsService.LogEjecuciones
             return false;
         }
 
-        private static List<Ejecucion> MapearLogs(List<LogEjecucion> logErrors, int SistemaId)
+        private static List<Ejecucion> MapearLogs(List<LogEjecucion> logErrors, int SistemaId, int EjecucionConfiguracionId, string filename)
         {
             List<Ejecucion> list = new List<Ejecucion>();
             logErrors.ForEach(x =>
@@ -297,7 +297,9 @@ namespace MonitorWindowsService.LogEjecuciones
                     ProcesoId = x.ProcesoId,
                     Servidor = x.ServerName,
                     SistemaId = SistemaId,
-                    UsuarioCreacionId = 1
+                    UsuarioCreacionId = 1,
+                    EjecucionConfiguracionId = EjecucionConfiguracionId,
+                    NombreArchivo = filename
                 });
             });
             return list;
