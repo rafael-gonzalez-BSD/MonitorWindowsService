@@ -60,7 +60,7 @@ namespace MonitorWindowsService.LogExcepciones
                             }
                         }
 
-                        if (res.Satisfactorio)
+                        if (res.Satisfactorio && filenames.Count > 0)
                         {
                             if (existenLeidos)
                             {
@@ -70,9 +70,8 @@ namespace MonitorWindowsService.LogExcepciones
                             {
                                 RegistrarArchivosLeidos(1, filenames, logErrors.Count, item.ConfiguracionId, false, out res);
                             }
-
-                            ActualizarVisitaConfiguracion(4, item.ConfiguracionId, 1, false, out m);
                         }
+                        ActualizarVisitaConfiguracion(4, item.ConfiguracionId, 1, false, out m);
                     }
                 }
             }

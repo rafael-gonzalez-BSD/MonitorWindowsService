@@ -68,9 +68,9 @@ namespace MonitorWindowsService.LogEjecuciones
                             else
                             {
                                 RegistrarArchivosLeidos(1, filenames, logErrors.Count, item.ConfiguracionId, false, out res);
-                            }
-                            ActualizarVisitaConfiguracion(4, item.ConfiguracionId, 1, false, out m);
+                            }                            
                         }
+                        ActualizarVisitaConfiguracion(4, item.ConfiguracionId, 1, false, out m);
                     }
                 }
             }
