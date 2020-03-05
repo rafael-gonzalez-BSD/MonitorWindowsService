@@ -55,6 +55,7 @@
     <Compile Include="Implementacion\EjecucionDao.cs" />
     <Compile Include="Implementacion\ExcepcionConfiguracionLecturaDao.cs" />
     <Compile Include="Implementacion\ExcepcionDao.cs" />
+    <Compile Include="Implementacion\MonitorConfiguracionDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

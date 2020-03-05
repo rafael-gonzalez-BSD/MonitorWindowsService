@@ -2,8 +2,10 @@
 using MonitorWindowsService.Datos.Implementacion;
 using MonitorWindowsService.Entidad;
 using MonitorWindowsService.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 
@@ -13,6 +15,7 @@ namespace MonitorWindowsService.LogEjecuciones
     {
         private readonly EjecucionDao _dao;
         private readonly EjecucionConfiguracionLecturaDao _daoLectura;
+        private readonly MonitorConfiguracionDao _daoConfig;
         private readonly Log _eventLog;
         private RespuestaModel m;
 
@@ -21,6 +24,7 @@ namespace MonitorWindowsService.LogEjecuciones
             m = new RespuestaModel();
             _dao = new EjecucionDao();
             _daoLectura = new EjecucionConfiguracionLecturaDao();
+            _daoConfig = new MonitorConfiguracionDao();
             _eventLog = new Log("Proceso de Ejecuciones", "Servicio de Monitor de Procesos");
         }
 
@@ -76,6 +80,10 @@ namespace MonitorWindowsService.LogEjecuciones
             }
             catch (Exception ex)
             {
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
                 _eventLog.CrearLog("Error interno del servicio de ejecuciones. " + ex.Message + ". " + ex.InnerException?.ToString(), System.Diagnostics.EventLogEntryType.Error);
             }
         }
@@ -123,6 +131,10 @@ namespace MonitorWindowsService.LogEjecuciones
             }
             catch (Exception ex)
             {
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
                 logErrors = new List<LogEjecucion>();
                 string error = string.Format("Hubo un problema con el proceso. {0}. {1}.", ex.Message, ex.InnerException?.ToString());
                 _eventLog.CrearLog(error);
@@ -173,6 +185,10 @@ namespace MonitorWindowsService.LogEjecuciones
             }
             catch (Exception ex)
             {
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
                 logErrors = new List<LogEjecucion>();
                 string error = string.Format("Hubo un problema con el proceso. {0}. {1}.", ex.Message, ex.InnerException?.ToString());
                 _eventLog.CrearLog(error);
@@ -190,6 +206,46 @@ namespace MonitorWindowsService.LogEjecuciones
                 foreach (Ejecucion ejecucion in list.OrderBy(x => x.FechaOcurrencia))
                 {
                     Dictionary<string, dynamic> P = ejecucion.AsDictionary();
+                    m = _dao.Insertar<RespuestaModel>(P);
+                }
+            }
+            catch (Exception ex)
+            {
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
+                m.Id = 0;
+                m.ErrorId = -2;
+                m.Satisfactorio = false;
+                m.Datos = null;
+                m.Mensaje = ex.Message + ". " + ex.InnerException;
+            }
+
+            return m;
+        }
+        private RespuestaModel RegistrarExcepcion(LogExcepcion logEx, int? SistemaId)
+        {
+            List<LogExcepcion> logErrors = new List<LogExcepcion> { logEx };
+            if (!SistemaId.HasValue)
+            {
+                string Identificador = ConfigurationManager.AppSettings["SistemaDefault"];
+                Dictionary<string, dynamic> PConfig = new Dictionary<string, dynamic> {
+                    {"Identificador", Identificador }
+                };
+                var monConfig = _daoConfig.ConsultarPor<MonitorConfiguracion>(PConfig);
+                if (monConfig != null)
+                {
+                    SistemaId = Convert.ToInt32(monConfig.Valor);
+                }
+            }
+            List<Excepcion> list = MapearLogs(logErrors, SistemaId.Value);
+
+            try
+            {
+                foreach (Excepcion excepcion in list)
+                {
+                    Dictionary<string, dynamic> P = excepcion.AsDictionary();
                     m = _dao.Insertar<RespuestaModel>(P);
                 }
             }
@@ -221,6 +277,10 @@ namespace MonitorWindowsService.LogEjecuciones
             }
             catch (Exception ex)
             {
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
                 res.Id = 0;
                 res.ErrorId = -2;
                 res.Satisfactorio = false;
@@ -247,7 +307,10 @@ namespace MonitorWindowsService.LogEjecuciones
             }
             catch (Exception ex)
             {
-                throw;
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
             }
         }
 
@@ -268,7 +331,10 @@ namespace MonitorWindowsService.LogEjecuciones
             }
             catch (Exception ex)
             {
-                throw;
+                string InnerExcepcionResult = (ex.InnerException != null ? ex.InnerException?.ToString() : "").Trim();
+                string ErrorResult = ("Error en el proceso: " + ex.Message + ". " + InnerExcepcionResult).Trim();
+                LogExcepcion logEx = GenerarLogExcepcion("Proceso de Ejecuciones", ErrorResult, ErrorResult, "750", InnerExcepcionResult, "Proceso de Ejecuciones");
+                m = RegistrarExcepcion(logEx, null);
             }
         }
 
@@ -303,6 +369,52 @@ namespace MonitorWindowsService.LogEjecuciones
                 });
             });
             return list;
+        }
+
+        private static List<Excepcion> MapearLogs(List<LogExcepcion> logErrors, int SistemaId)
+        {
+            List<Excepcion> list = new List<Excepcion>();
+            logErrors.ForEach(x =>
+            {
+                string logText = JsonConvert.SerializeObject(x);
+                list.Add(new Excepcion()
+                {
+                    Error = x.Error,
+                    ErrorDescripcion = x.ErrorDescription,
+                    ErrorNumero = x.ErrorNumber,
+                    FechaOcurrencia = x.FechaRegistro,
+                    LogText = logText,
+                    Pagina = x.Page,
+                    Servidor = x.ServerName,
+                    SistemaId = SistemaId,
+                    UsuarioCreacionId = 1
+                });
+            });
+            return list;
+        }
+
+        private static LogExcepcion GenerarLogExcepcion(string Aplicacion, string Error, string ErrorDescription, string ErrorNumber, string InnerException, string Page)
+        {
+            return new LogExcepcion()
+            {
+                Aplicacion = Aplicacion,
+                BrowserType = "",
+                CookiesInfo = "",
+                Error = Error, // <----- Aqui ponerle el texto personalizado
+                ErrorDescription = ErrorDescription,  // <----- Aqui ponerle el texto personalizado
+                ErrorNumber = ErrorNumber, // error grupal de Ejecuciones
+                FechaRegistro = DateTime.Now,
+                InnerException = InnerException,
+                LocalStorage = "",
+                Page = Page,
+                PageReferrer = "",
+                ProcesoId = -1,
+                QueryString = "",
+                ServerName = "",
+                SessionInfo = "",
+                SiglaRed = ""
+
+            };
         }
     }
 }
